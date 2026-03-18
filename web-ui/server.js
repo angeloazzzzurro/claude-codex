@@ -1,6 +1,22 @@
+require("dotenv").config();
 const express = require("express");
 const Anthropic = require("@anthropic-ai/sdk");
 const path = require("path");
+
+// Rate limiter semplice: max 20 richieste/minuto per IP
+const ratemap = new Map();
+function rateLimit(req, res, next) {
+  const ip = req.ip;
+  const now = Date.now();
+  const window = 60_000;
+  const max = 20;
+  const entry = ratemap.get(ip) || { count: 0, start: now };
+  if (now - entry.start > window) { entry.count = 0; entry.start = now; }
+  entry.count++;
+  ratemap.set(ip, entry);
+  if (entry.count > max) return res.status(429).json({ error: "Troppe richieste, aspetta un minuto." });
+  next();
+}
 
 const app = express();
 app.use(express.json({ limit: "16kb" }));
