@@ -10,7 +10,6 @@ const scenarioSelect = document.getElementById("scenarioSelect");
 const minRateInput   = document.getElementById("minRate");
 const userPrompt     = document.getElementById("userPrompt");
 const btnInvia       = document.getElementById("btnInvia");
-const apiKeyInput    = document.getElementById("apiKey");
 
 // Scenari: usati per "Avvia simulazione" → genera una domanda predefinita verso live AI
 const scenari = [
@@ -20,11 +19,6 @@ const scenari = [
   { id: "tech-arch",         titolo: "Tecnologia / Architettura", domanda: "come migliorare l'architettura tecnica riducendo il debito" },
   { id: "vendite-business",  titolo: "Vendite / Business",       domanda: "come aumentare le vendite e ottimizzare il pricing" },
 ];
-
-// Carica API key da localStorage
-if (apiKeyInput && localStorage.getItem("anthropic_key")) {
-  apiKeyInput.value = localStorage.getItem("anthropic_key");
-}
 
 function populateScenarioSelect() {
   scenarioSelect.innerHTML = "";
