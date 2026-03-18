@@ -178,7 +178,7 @@ async function runLive(question) {
     const res = await fetch("/api/live", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question, apiKey, minRate }),
+      body: JSON.stringify({ question, minRate }),
       signal: abortController.signal,
     });
 
