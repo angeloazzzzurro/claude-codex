@@ -1,0 +1,30 @@
+Dataset Links — deepML1
+=======================
+
+FER2013 (immagini, 7 emozioni)
+-------------------------------
+  Zenodo: https://zenodo.org/records/11063852
+  Path atteso: deepML1/images/data/fer2013.csv
+  Formato CSV: colonne "emotion" (0-6), "pixels" (stringa spazio-separata 48×48), "Usage"
+  Classi: 0=Angry 1=Disgust 2=Fear 3=Happy 4=Sad 5=Surprise 6=Neutral
+
+RAVDESS Speech 16k (audio, 8 emozioni)
+---------------------------------------
+  Zenodo: https://zenodo.org/records/11063852  ← stessa pagina FER2013 (mirror)
+  Zenodo originale: https://zenodo.org/records/1188976
+  Path atteso: deepML1/audio/data/Audio_Speech_Actors_01-24_16k/
+  Struttura: Actor_01/ ... Actor_24/ con file .wav
+  Naming: 03-01-EM-02-01-01-01.wav (campo[2] = emotion 01-08)
+
+RAVDESS Completo audio+video (8 emozioni)
+------------------------------------------
+  Zenodo: https://zenodo.org/records/1188976
+  Path atteso: deepML1/multimodal/data/RAVDESS/
+  Contiene: .wav (audio) + .mp4 (video)
+  Naming identico allo speech 16k
+
+NOTA SULLE EMOZIONI RAVDESS
+-----------------------------
+  01=neutral  02=calm  03=happy  04=sad
+  05=angry    06=fearful  07=disgusted  08=surprised
+  label PyTorch = emotion_id - 1  (range 0-7)

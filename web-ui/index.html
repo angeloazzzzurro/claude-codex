@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Codex x Claude — Live</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="grid"></div>
+  </div>
+
+  <main class="shell">
+    <header class="top">
+      <div class="title">
+        <span class="pill">Live AI</span>
+        <h1>Codex × Claude</h1>
+        <p>Claude e Codex ragionano insieme sulla tua domanda in tempo reale.</p>
+      </div>
+      <div class="controls">
+        <div class="control" style="min-width:280px">
+          <label for="apiKey">Anthropic API Key</label>
+          <input id="apiKey" type="password" placeholder="sk-ant-..." autocomplete="off" />
+        </div>
+        <button id="btnReset" class="btn ghost">Reset</button>
+      </div>
+    </header>
+
+    <section class="board">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Dialogo — Claude</h2>
+          <span class="status" id="statusDialogo">Pronto</span>
+        </div>
+        <div id="dialogo" class="stream"></div>
+        <div class="terminal">
+          <div class="terminal-head">Terminale</div>
+          <div class="terminal-row">
+            <span class="prompt">›</span>
+            <input id="userPrompt" type="text" placeholder="Scrivi la domanda e premi Invio…" />
+            <button id="btnInvia" class="btn ghost">Invia</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Ragionamento — Codex</h2>
+          <span class="status" id="statusRag">In attesa</span>
+        </div>
+        <div id="ragionamento" class="stream"></div>
+      </div>
+    </section>
+
+    <section class="results">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Opzioni finali</h2>
+          <span class="status" id="statusOpzioni">In attesa</span>
+        </div>
+        <div id="opzioni" class="cards"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
