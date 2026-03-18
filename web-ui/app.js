@@ -156,9 +156,13 @@ function addErrorCard(msg) {
 
 // ---- Live AI call ----
 
+const MAX_QUESTION_LEN = 2000;
+
 async function runLive(question) {
-  const apiKey = apiKeyInput.value.trim();
-  if (apiKey) localStorage.setItem("anthropic_key", apiKey);
+  if (question.length > MAX_QUESTION_LEN) {
+    addErrorCard(`Domanda troppo lunga (max ${MAX_QUESTION_LEN} caratteri)`);
+    return;
+  }
 
   const minRate = Math.max(0, Math.min(100, parseInt(minRateInput.value, 10) || 0));
 

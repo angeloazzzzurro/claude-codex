@@ -134,7 +134,9 @@ app.post("/api/live", async (req, res) => {
     send("options", { options });
     send("done");
   } catch (err) {
-    send("error", { message: err.message });
+    // Non esporre dettagli interni dell'SDK al client
+    const isAuthErr = err.status === 401 || err.message?.includes("auth");
+    send("error", { message: isAuthErr ? "API key non valida" : "Errore durante la chiamata AI" });
   }
 
   res.end();
