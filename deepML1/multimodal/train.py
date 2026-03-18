@@ -59,7 +59,7 @@ def main():
     if not data_dir.exists():
         raise FileNotFoundError("Place RAVDESS dataset in multimodal/data/")
 
-    dataset = DummyMultimodalDataset(data_dir)
+    dataset = RAVDESSMultimodalDataset(data_dir)
     loader = DataLoader(dataset, batch_size=4, shuffle=True)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
