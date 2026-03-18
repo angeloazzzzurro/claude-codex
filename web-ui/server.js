@@ -35,7 +35,7 @@ app.use(express.static(__dirname, {
 
 const MAX_QUESTION_LEN = 2000;
 
-app.post("/api/live", async (req, res) => {
+app.post("/api/live", rateLimit, async (req, res) => {
   const { question } = req.body;
   if (!question || !question.trim()) {
     return res.status(400).json({ error: "question mancante" });
