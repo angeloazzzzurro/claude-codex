@@ -19,8 +19,9 @@ class RAVDESSDataset(Dataset):
         path = self.files[idx]
         waveform, sr = torchaudio.load(path)
         mel = mel_spectrogram(waveform, sample_rate=sr)
-        # Placeholder label: parse from filename if needed
-        label = 0
+        # RAVDESS filename: 03-01-05-02-01-01-01.wav → field[2] = emotion (1-8)
+        emotion_id = int(path.stem.split('-')[2])
+        label = emotion_id - 1  # 0-7
         x = mel.unsqueeze(0)  # [1, n_mels, time]
         y = torch.tensor(label, dtype=torch.long)
         return x, y
