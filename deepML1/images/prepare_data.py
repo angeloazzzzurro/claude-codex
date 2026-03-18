@@ -14,7 +14,7 @@ class FER2013Dataset(Dataset):
 
     def __getitem__(self, idx: int):
         row = self.df.iloc[idx]
-        pixels = np.fromstring(row["pixels"], sep=" ", dtype=np.float32)
+        pixels = np.array(row["pixels"].split(), dtype=np.float32)
         img = pixels.reshape(48, 48) / 255.0
         label = int(row["emotion"])
         x = torch.tensor(img).unsqueeze(0)  # [1, 48, 48]
