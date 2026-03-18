@@ -95,6 +95,12 @@ body {
   margin: 6px 0 5px;
 }
 .title p { color: var(--ink-dim); font-size: 14px; }
+.title-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
 
 .pill {
   display: inline-block;
@@ -153,6 +159,11 @@ body {
 }
 .btn.primary:hover { box-shadow: 0 12px 30px rgba(124,109,250,0.5); }
 .btn.ghost { background: transparent; color: var(--ink-dim); }
+.btn-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
 
 /* ── Board ── */
 .board {
@@ -258,6 +269,12 @@ body {
   min-height: 140px;
 }
 
+.me-time-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
 .card {
   border: 1px solid var(--stroke);
   background: rgba(255,255,255,0.03);
@@ -297,4 +314,5 @@ body {
   .top { flex-direction: column; }
   .board { grid-template-columns: 1fr; }
   .results .cards { grid-template-columns: 1fr; }
+  .me-time-grid { grid-template-columns: 1fr; }
 }
