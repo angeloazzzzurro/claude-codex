@@ -21,17 +21,15 @@ function rateLimit(req, res, next) {
 const app = express();
 app.use(express.json({ limit: "16kb" }));
 
-// Serve solo i file statici del frontend — mai server.js o package.json
-app.use(express.static(__dirname, {
-  index: "index.html",
-  dotfiles: "deny",
-  setHeaders: (res, filePath) => {
-    const blocked = ["server.js", "package.json", "package-lock.json", ".env"];
-    if (blocked.some((f) => filePath.endsWith(f))) {
-      res.status(403).end();
-    }
-  },
-}));
+// Blocca file sensibili prima dello static handler
+const BLOCKED = /\/(server\.js|package(-lock)?\.json|\.env|.*\.mjs)$/i;
+app.use((req, res, next) => {
+  if (BLOCKED.test(req.path)) return res.status(403).end();
+  next();
+});
+
+// Serve solo i file statici del frontend
+app.use(express.static(__dirname, { index: "index.html", dotfiles: "deny" }));
 
 const MAX_QUESTION_LEN = 2000;
 
