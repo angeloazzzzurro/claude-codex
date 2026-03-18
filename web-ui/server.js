@@ -3,18 +3,35 @@ const Anthropic = require("@anthropic-ai/sdk");
 const path = require("path");
 
 const app = express();
-app.use(express.json());
-app.use(express.static(__dirname));
+app.use(express.json({ limit: "16kb" }));
+
+// Serve solo i file statici del frontend — mai server.js o package.json
+app.use(express.static(__dirname, {
+  index: "index.html",
+  dotfiles: "deny",
+  setHeaders: (res, filePath) => {
+    const blocked = ["server.js", "package.json", "package-lock.json", ".env"];
+    if (blocked.some((f) => filePath.endsWith(f))) {
+      res.status(403).end();
+    }
+  },
+}));
+
+const MAX_QUESTION_LEN = 2000;
 
 app.post("/api/live", async (req, res) => {
-  const { question, apiKey } = req.body;
+  const { question } = req.body;
   if (!question || !question.trim()) {
     return res.status(400).json({ error: "question mancante" });
   }
+  if (question.length > MAX_QUESTION_LEN) {
+    return res.status(400).json({ error: `Domanda troppo lunga (max ${MAX_QUESTION_LEN} caratteri)` });
+  }
 
-  const key = apiKey || process.env.ANTHROPIC_API_KEY;
+  // La API key viene letta SOLO da variabile d'ambiente — non dal body
+  const key = process.env.ANTHROPIC_API_KEY;
   if (!key) {
-    return res.status(401).json({ error: "API key mancante" });
+    return res.status(500).json({ error: "API key non configurata sul server" });
   }
 
   res.setHeader("Content-Type", "text/event-stream");
