@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Codex x Claude — Live</title>
+  <title>Codex x Claude — Dialogo e Opzioni</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -16,15 +16,24 @@
   <main class="shell">
     <header class="top">
       <div class="title">
-        <span class="pill">Live AI</span>
+        <span class="pill">Simulatore</span>
         <h1>Codex × Claude</h1>
-        <p>Claude e Codex ragionano insieme sulla tua domanda in tempo reale.</p>
+        <p>Dialogo, ragionamento e due opzioni con tasso di successo maggiore.</p>
       </div>
       <div class="controls">
-        <div class="control" style="min-width:280px">
-          <label for="apiKey">Anthropic API Key</label>
-          <input id="apiKey" type="password" placeholder="sk-ant-..." autocomplete="off" />
+        <div class="control">
+          <label for="scenarioSelect">Scenario</label>
+          <select id="scenarioSelect"></select>
         </div>
+        <div class="control" style="min-width:120px">
+          <label for="minRate">Tasso minimo (%)</label>
+          <input id="minRate" type="number" min="0" max="100" value="70" />
+        </div>
+        <div class="control control-key">
+          <label for="apiKey">API Key</label>
+          <input id="apiKey" type="password" placeholder="sk-ant-…" autocomplete="off" />
+        </div>
+        <button id="btnSimula" class="btn primary">Avvia simulazione</button>
         <button id="btnReset" class="btn ghost">Reset</button>
       </div>
     </header>
@@ -32,15 +41,15 @@
     <section class="board">
       <div class="panel">
         <div class="panel-head">
-          <h2>Dialogo — Claude</h2>
+          <h2>Dialogo</h2>
           <span class="status" id="statusDialogo">Pronto</span>
         </div>
         <div id="dialogo" class="stream"></div>
         <div class="terminal">
           <div class="terminal-head">Terminale</div>
           <div class="terminal-row">
-            <span class="prompt">›</span>
-            <input id="userPrompt" type="text" placeholder="Scrivi la domanda e premi Invio…" />
+            <span class="prompt">codex&gt;</span>
+            <input id="userPrompt" type="text" placeholder="Scrivi la domanda e premi Invio..." />
             <button id="btnInvia" class="btn ghost">Invia</button>
           </div>
         </div>
@@ -48,7 +57,7 @@
 
       <div class="panel">
         <div class="panel-head">
-          <h2>Ragionamento — Codex</h2>
+          <h2>Ragionamento</h2>
           <span class="status" id="statusRag">In attesa</span>
         </div>
         <div id="ragionamento" class="stream"></div>
