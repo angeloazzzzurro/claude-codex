@@ -1,27 +1,57 @@
 from pathlib import Path
 import torch
+import torch.nn.functional as F
 from torch import nn
 from torch.utils.data import Dataset, DataLoader
+import torchaudio
+import torchaudio.transforms as T
+import torchvision.io
 
 from model_audio import AudioEncoder
 from model_video import VideoEncoder
 from fusion import FusionClassifier
 
+N_MELS = 64
+N_FRAMES = 8
+IMG_SIZE = 64
 
-class DummyMultimodalDataset(Dataset):
+
+class RAVDESSMultimodalDataset(Dataset):
     def __init__(self, root: Path):
-        self.audio = list(root.rglob("*.wav"))
-        self.video = list(root.rglob("*.mp4"))
+        wavs = {p.stem: p for p in root.rglob("*.wav")}
+        mp4s = {p.stem: p for p in root.rglob("*.mp4")}
+        common = sorted(set(wavs) & set(mp4s))
+        self.pairs = [(wavs[s], mp4s[s]) for s in common]
 
     def __len__(self):
-        return min(len(self.audio), len(self.video))
+        return len(self.pairs)
 
     def __getitem__(self, idx):
-        # Placeholder tensors (replace with real loaders)
-        audio = torch.randn(1, 64, 64)
-        video = torch.randn(3, 8, 64, 64)
-        label = torch.tensor(0, dtype=torch.long)
-        return audio, video, label
+        wav_path, mp4_path = self.pairs[idx]
+
+        # Label: RAVDESS filename field[2] = emotion (1-8) → 0-7
+        emotion_id = int(wav_path.stem.split('-')[2])
+        label = emotion_id - 1
+
+        # Audio → mel spectrogram (1, N_MELS, IMG_SIZE)
+        waveform, sr = torchaudio.load(wav_path)
+        mel_transform = T.MelSpectrogram(sample_rate=sr, n_fft=1024, n_mels=N_MELS, hop_length=512)
+        mel = mel_transform(waveform).mean(0, keepdim=True)  # (1, N_MELS, time)
+        mel = F.interpolate(mel.unsqueeze(0), size=(N_MELS, IMG_SIZE), mode='bilinear', align_corners=False).squeeze(0)
+
+        # Video → sampled frames (3, N_FRAMES, IMG_SIZE, IMG_SIZE)
+        frames, _, _ = torchvision.io.read_video(str(mp4_path), pts_unit='sec', output_format='TCHW')
+        frames = frames.float() / 255.0  # (T, C, H, W)
+        T_total = frames.shape[0]
+        indices = torch.linspace(0, T_total - 1, N_FRAMES).long()
+        frames = frames[indices]  # (N_FRAMES, C, H, W)
+        frames = frames.permute(1, 0, 2, 3)  # (C, N_FRAMES, H, W)
+        C, Tf, H, W = frames.shape
+        frames_2d = frames.reshape(C * Tf, 1, H, W)
+        frames_2d = F.interpolate(frames_2d, size=(IMG_SIZE, IMG_SIZE), mode='bilinear', align_corners=False)
+        frames = frames_2d.reshape(C, Tf, IMG_SIZE, IMG_SIZE)[:3]
+
+        return mel, frames, torch.tensor(label, dtype=torch.long)
 
 
 def main():
