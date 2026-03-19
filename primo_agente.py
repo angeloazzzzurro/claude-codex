@@ -124,7 +124,7 @@ def esegui_tool(nome: str, input_data: dict) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Loop agente
+# 🤖 Loop agente
 # ---------------------------------------------------------------------------
 
 def agente(prompt_utente: str, verbose: bool = True) -> str:
