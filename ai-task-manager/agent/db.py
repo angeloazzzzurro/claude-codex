@@ -1,7 +1,7 @@
-"""SQLite storage for tasks."""
+"""SQLite storage for tasks and conversation history."""
 
+import json
 import sqlite3
-from datetime import datetime
 from pathlib import Path
 
 DB_PATH = Path(__file__).parent.parent / "data" / "tasks.db"
@@ -25,6 +25,13 @@ def init_db():
                 project  TEXT,
                 due_date TEXT,
                 created  TEXT DEFAULT (datetime('now'))
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS history (
+                id      INTEGER PRIMARY KEY AUTOINCREMENT,
+                role    TEXT NOT NULL,
+                content TEXT NOT NULL   -- JSON serializzato
             )
         """)
 
@@ -79,3 +86,24 @@ def delete_task(task_id: int) -> bool:
     with get_conn() as conn:
         cur = conn.execute("DELETE FROM tasks WHERE id=?", (task_id,))
         return cur.rowcount > 0
+
+
+# ── History ──────────────────────────────────────────────────────────────────
+
+def save_message(role: str, content) -> None:
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT INTO history (role, content) VALUES (?, ?)",
+            (role, json.dumps(content, default=str)),
+        )
+
+
+def load_history() -> list[dict]:
+    with get_conn() as conn:
+        rows = conn.execute("SELECT role, content FROM history ORDER BY id").fetchall()
+    return [{"role": r["role"], "content": json.loads(r["content"])} for r in rows]
+
+
+def clear_history() -> None:
+    with get_conn() as conn:
+        conn.execute("DELETE FROM history")

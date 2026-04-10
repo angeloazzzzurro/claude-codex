@@ -1,0 +1,33 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="800" rx="32" fill="#0B1220"/>
+  <rect x="28" y="28" width="1144" height="744" rx="28" fill="#111827" stroke="#1E3A8A" stroke-width="2"/>
+  <rect x="56" y="56" width="1088" height="74" rx="22" fill="#0F172A"/>
+  <text x="92" y="102" fill="#DBEAFE" font-size="30" font-family="Arial">claude-codex local workspace</text>
+  <rect x="56" y="158" width="320" height="566" rx="24" fill="#0F172A" stroke="#1D4ED8"/>
+  <text x="88" y="204" fill="#E5F0FF" font-size="24" font-family="Arial">Repository map</text>
+  <text x="88" y="246" fill="#93C5FD" font-size="18" font-family="Courier New">web-ui/</text>
+  <text x="88" y="278" fill="#93C5FD" font-size="18" font-family="Courier New">textual/</text>
+  <text x="88" y="310" fill="#93C5FD" font-size="18" font-family="Courier New">ai-task-manager/</text>
+  <text x="88" y="342" fill="#93C5FD" font-size="18" font-family="Courier New">mediapipe/</text>
+  <text x="88" y="374" fill="#93C5FD" font-size="18" font-family="Courier New">deepML1/</text>
+  <text x="88" y="406" fill="#93C5FD" font-size="18" font-family="Courier New">video_gen/</text>
+
+  <rect x="404" y="158" width="740" height="264" rx="24" fill="#F8FBFF" stroke="#DBEAFE"/>
+  <text x="438" y="204" fill="#1E3A8A" font-size="24" font-family="Arial">web-ui</text>
+  <rect x="438" y="226" width="672" height="160" rx="18" fill="white" stroke="#BFDBFE"/>
+  <text x="466" y="264" fill="#1D4ED8" font-size="18" font-family="Courier New">index.html · styles.css · app.js · server.js</text>
+  <text x="466" y="300" fill="#475569" font-size="18" font-family="Arial">Simulatore browser con 5 scenari, bubble chat e option cards</text>
+  <text x="466" y="334" fill="#475569" font-size="18" font-family="Arial">Test Playwright e screenshot mobile inclusi</text>
+
+  <rect x="404" y="450" width="356" height="274" rx="24" fill="#F8FBFF" stroke="#DBEAFE"/>
+  <text x="438" y="496" fill="#1E3A8A" font-size="24" font-family="Arial">textual</text>
+  <rect x="438" y="522" width="288" height="156" rx="18" fill="#0F172A"/>
+  <text x="462" y="560" fill="#93C5FD" font-size="17" font-family="Courier New">Input + buttons + label</text>
+  <text x="462" y="592" fill="#BFDBFE" font-size="17" font-family="Courier New">TUI demo in Python</text>
+
+  <rect x="788" y="450" width="356" height="274" rx="24" fill="#F8FBFF" stroke="#DBEAFE"/>
+  <text x="822" y="496" fill="#1E3A8A" font-size="24" font-family="Arial">ai-task-manager</text>
+  <rect x="822" y="522" width="288" height="156" rx="18" fill="#EFF6FF"/>
+  <text x="848" y="560" fill="#1D4ED8" font-size="17" font-family="Arial">agent/ + data/ + orchestration</text>
+  <text x="848" y="592" fill="#475569" font-size="17" font-family="Arial">task planning e flussi operativi</text>
+</svg>

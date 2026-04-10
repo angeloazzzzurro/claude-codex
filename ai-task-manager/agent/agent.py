@@ -62,14 +62,6 @@ TOOLS: list[anthropic.types.ToolParam] = [
             "required": ["task_id"],
         },
     },
-    {
-        "name": "suggest_next",
-        "description": (
-            "Analizza tutti i task aperti e suggerisce quale affrontare per primo, "
-            "tenendo conto di priorità, scadenze e progetto."
-        ),
-        "input_schema": {"type": "object", "properties": {}},
-    },
 ]
 
 PRIORITY_LABEL = {1: "🔴 alta", 2: "🟡 media", 3: "🟢 bassa"}
@@ -85,37 +77,35 @@ def _fmt_task(t: dict) -> str:
 
 
 def _execute_tool(name: str, inp: dict) -> str:
-    if name == "add_task":
-        t = db.add_task(**inp)
-        return f"Task aggiunto: {_fmt_task(t)}"
+    try:
+        if name == "add_task":
+            t = db.add_task(**inp)
+            return f"Task aggiunto: {_fmt_task(t)}"
 
-    elif name == "list_tasks":
-        tasks = db.list_tasks(
-            status=inp.get("status", "all"),
-            project=inp.get("project", ""),
-        )
-        if not tasks:
-            return "Nessun task trovato."
-        return "\n".join(_fmt_task(t) for t in tasks)
+        elif name == "list_tasks":
+            tasks = db.list_tasks(
+                status=inp.get("status", "all"),
+                project=inp.get("project", ""),
+            )
+            if not tasks:
+                return "Nessun task trovato."
+            return "\n".join(_fmt_task(t) for t in tasks)
 
-    elif name == "update_task":
-        task_id = inp.pop("task_id")
-        t = db.update_task(task_id, **inp)
-        if not t:
-            return f"Task #{task_id} non trovato."
-        return f"Task aggiornato: {_fmt_task(t)}"
+        elif name == "update_task":
+            task_id = inp.pop("task_id")
+            t = db.update_task(task_id, **inp)
+            if not t:
+                return f"Task #{task_id} non trovato."
+            return f"Task aggiornato: {_fmt_task(t)}"
 
-    elif name == "delete_task":
-        ok = db.delete_task(inp["task_id"])
-        return f"Task #{inp['task_id']} eliminato." if ok else "Task non trovato."
+        elif name == "delete_task":
+            ok = db.delete_task(inp["task_id"])
+            return f"Task #{inp['task_id']} eliminato." if ok else "Task non trovato."
 
-    elif name == "suggest_next":
-        tasks = db.list_tasks(status="todo") + db.list_tasks(status="doing")
-        if not tasks:
-            return "Nessun task aperto. Ottimo lavoro! 🎉"
-        return "Task aperti (per priorità):\n" + "\n".join(_fmt_task(t) for t in tasks)
+        return f"Tool '{name}' non riconosciuto."
 
-    return f"Tool '{name}' non riconosciuto."
+    except Exception as e:
+        return f"Errore nell'esecuzione di '{name}': {e}"
 
 
 SYSTEM_PROMPT = """Sei un assistente personale per la gestione dei lavori.
@@ -126,41 +116,57 @@ Quando l'utente chiede cosa fare, analizza i task aperti e suggerisci quello pi�
 
 
 class TaskAgent:
+    MAX_STEPS = 10
+    MAX_HISTORY_TURNS = 20  # turni utente+assistente tenuti in memoria
+
     def __init__(self):
         db.init_db()
         self.client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-        self.history: list[anthropic.types.MessageParam] = []
+        self.history: list[anthropic.types.MessageParam] = db.load_history()
+
+    def _trim_history(self) -> list[anthropic.types.MessageParam]:
+        """Ritorna gli ultimi MAX_HISTORY_TURNS turni, sempre in coppia user/assistant."""
+        if len(self.history) <= self.MAX_HISTORY_TURNS:
+            return self.history
+        trimmed = self.history[-self.MAX_HISTORY_TURNS:]
+        # Assicura che il primo messaggio sia sempre "user" (no orphan assistant)
+        while trimmed and trimmed[0]["role"] != "user":
+            trimmed = trimmed[1:]
+        return trimmed
+
+    def _step(self, depth: int) -> str:
+        if depth == 0:
+            return "Errore: raggiunto il limite massimo di operazioni senza completare."
+
+        response = self.client.messages.create(
+            model="claude-opus-4-6",
+            max_tokens=2048,
+            system=SYSTEM_PROMPT,
+            tools=TOOLS,
+            messages=self._trim_history(),
+        )
+
+        assistant_content = [b.model_dump() for b in response.content]
+        self.history.append({"role": "assistant", "content": assistant_content})
+        db.save_message("assistant", assistant_content)
+
+        if response.stop_reason == "end_turn":
+            return next((b.text for b in response.content if b.type == "text"), "")
+
+        tool_results = [
+            {
+                "type": "tool_result",
+                "tool_use_id": block.id,
+                "content": _execute_tool(block.name, dict(block.input)),
+            }
+            for block in response.content
+            if block.type == "tool_use"
+        ]
+        self.history.append({"role": "user", "content": tool_results})
+        db.save_message("user", tool_results)
+        return self._step(depth - 1)
 
     def chat(self, user_message: str) -> str:
         self.history.append({"role": "user", "content": user_message})
-
-        while True:
-            response = self.client.messages.create(
-                model="claude-opus-4-6",
-                max_tokens=2048,
-                system=SYSTEM_PROMPT,
-                tools=TOOLS,
-                messages=self.history,
-            )
-
-            if response.stop_reason == "end_turn":
-                text = next(
-                    (b.text for b in response.content if b.type == "text"), ""
-                )
-                self.history.append({"role": "assistant", "content": response.content})
-                return text
-
-            # tool_use: esegui i tool e rimanda i risultati
-            self.history.append({"role": "assistant", "content": response.content})
-
-            tool_results = []
-            for block in response.content:
-                if block.type == "tool_use":
-                    result = _execute_tool(block.name, dict(block.input))
-                    tool_results.append({
-                        "type": "tool_result",
-                        "tool_use_id": block.id,
-                        "content": result,
-                    })
-
-            self.history.append({"role": "user", "content": tool_results})
+        db.save_message("user", user_message)
+        return self._step(self.MAX_STEPS)
